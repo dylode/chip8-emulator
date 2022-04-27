@@ -9,6 +9,7 @@ const (
 	memorySize        = 4096
 	variableRegisters = 0xF
 	programStart      = 0x200
+	fontStart         = 0x50
 )
 
 type Chip8 struct {
@@ -35,6 +36,7 @@ func New(rom []byte, screen *graphics.Graphics) *Chip8 {
 	}
 
 	chip.injectIntoMemory(programStart, rom)
+	chip.injectIntoMemory(fontStart, getFontData())
 
 	return chip
 }
@@ -50,6 +52,6 @@ func (chip *Chip8) PrintMemory(from int, to int, padding int) {
 	end := from + to + padding
 
 	for position, value := range chip.memory[start:end] {
-		fmt.Printf("%#x = %d\n", start+position, value)
+		fmt.Printf("%#x = %#x\n", start+position, value)
 	}
 }

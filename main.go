@@ -42,9 +42,8 @@ func main() {
 	defer screen.Close()
 
 	emulator := chip8.New(rom, screen)
-	emulator.PrintMemory(0x200, len(rom), 3)
+	emulator.PrintMemory(0x50, 5*16, 3)
 
-	//
 	//for i := 0; i <= 800*300; i++ {
 	//	screen.Buffer[i] = 0xFF000000
 	//}
