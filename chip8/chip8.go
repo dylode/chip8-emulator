@@ -59,7 +59,7 @@ func (chip *Chip8) injectIntoMemory(offset int, data []byte) {
 	}
 }
 
-func (chip *Chip8) Start() {
+func (chip *Chip8) Run() {
 	cpuClock := time.NewTicker(time.Second / cpuSpeed)
 	timerClock := time.NewTicker(time.Second / timerSpeed)
 

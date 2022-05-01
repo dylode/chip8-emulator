@@ -45,7 +45,7 @@ func main() {
 	emulator := chip8.New(rom, screen)
 	//emulator.PrintMemory(0x50, 5*16, 3)
 
-	go emulator.Start()
+	go emulator.Run()
 
 	//for i := 0; i <= 800*300; i++ {
 	//	screen.Buffer[i] = 0xFF000000
