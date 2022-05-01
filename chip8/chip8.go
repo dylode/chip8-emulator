@@ -3,6 +3,8 @@ package chip8
 import (
 	"chip8-emulator/graphics"
 	"fmt"
+	"github.com/veandco/go-sdl2/sdl"
+	"time"
 )
 
 const (
@@ -10,12 +12,16 @@ const (
 	variableRegisters = 0xF
 	programStart      = 0x200
 	fontStart         = 0x50
+	totalKeys         = 0xF
+	cpuSpeed          = 700 // Mhz
+	timerSpeed        = 60  // Mhz
 )
 
 type Chip8 struct {
 	/* Peripherals */
-	memory []byte
-	screen *graphics.Graphics
+	memory   []byte
+	screen   *graphics.Graphics
+	Keyboard keyboard
 
 	/* Registers */
 	pc       uint16
@@ -30,8 +36,14 @@ type Chip8 struct {
 
 func New(rom []byte, screen *graphics.Graphics) *Chip8 {
 	chip := &Chip8{
-		memory:   make([]byte, memorySize),
-		screen:   screen,
+		memory: make([]byte, memorySize),
+		screen: screen,
+		Keyboard: keyboard{
+			Input:   make(chan sdl.Scancode, totalKeys*2),
+			state:   make([]bool, totalKeys+1),
+			mapping: getKeyboardMapping(),
+		},
+
 		variable: make([]byte, variableRegisters),
 	}
 
@@ -47,11 +59,26 @@ func (chip *Chip8) injectIntoMemory(offset int, data []byte) {
 	}
 }
 
-func (chip *Chip8) Step() {
-	fmt.Println("Step")
+func (chip *Chip8) Start() {
+	cpuClock := time.NewTicker(time.Second / cpuSpeed)
+	timerClock := time.NewTicker(time.Second / timerSpeed)
+
+	for {
+		select {
+		case <-cpuClock.C:
+			chip.step()
+		case <-timerClock.C:
+			chip.updateTimers()
+		}
+	}
 }
 
-func (chip *Chip8) UpdateTimers() {
+func (chip *Chip8) step() {
+	chip.Keyboard.update()
+	fmt.Println(chip.Keyboard.state)
+}
+
+func (chip *Chip8) updateTimers() {
 	if chip.delay > 0 {
 		chip.delay--
 	}
