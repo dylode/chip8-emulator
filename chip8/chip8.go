@@ -47,6 +47,20 @@ func (chip *Chip8) injectIntoMemory(offset int, data []byte) {
 	}
 }
 
+func (chip *Chip8) Step() {
+	fmt.Println("Step")
+}
+
+func (chip *Chip8) UpdateTimers() {
+	if chip.delay > 0 {
+		chip.delay--
+	}
+
+	if chip.sound > 0 {
+		chip.sound--
+	}
+}
+
 func (chip *Chip8) PrintMemory(from int, to int, padding int) {
 	start := from - padding
 	end := from + to + padding
