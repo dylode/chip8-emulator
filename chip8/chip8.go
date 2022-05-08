@@ -4,6 +4,7 @@ import (
 	"chip8-emulator/graphics"
 	"fmt"
 	"github.com/veandco/go-sdl2/sdl"
+	"log"
 	"time"
 )
 
@@ -12,6 +13,8 @@ const (
 	variableRegisters = 0xF
 	programStart      = 0x200
 	fontStart         = 0x50
+	stackStart        = 0x100
+	stackEnd          = stackStart + (16 * 2)
 	totalKeys         = 0xF
 	cpuSpeed          = 700 // Mhz
 	timerSpeed        = 60  // Mhz
@@ -60,26 +63,36 @@ func New(rom []byte, screen *graphics.Graphics) *Chip8 {
 	return chip
 }
 
-func (chip *Chip8) injectIntoMemory(offset int, data []byte) {
-	for position, value := range data {
-		chip.memory[offset+position] = value
-	}
-}
-
 func (chip *Chip8) Run() {
-	for {
-		select {
-		case <-chip.cpuClock.C:
-			chip.step()
-		case <-chip.timerClock.C:
-			chip.updateTimers()
-		}
-	}
+	//for {
+	//	select {
+	//	case <-chip.cpuClock.C:
+	//		chip.step()
+	//	case <-chip.timerClock.C:
+	//		chip.updateTimers()
+	//	}
+	//}
+	chip.step()
 }
 
 func (chip *Chip8) Close() {
 	chip.cpuClock.Stop()
 	chip.timerClock.Stop()
+}
+
+func (chip *Chip8) PrintMemory(from int, to int, padding int) {
+	start := from - padding
+	end := from + to + padding
+
+	for position, value := range chip.memory[start:end] {
+		fmt.Printf("%#x = %#x\n", start+position, value)
+	}
+}
+
+func (chip *Chip8) injectIntoMemory(offset int, data []byte) {
+	for position, value := range data {
+		chip.memory[offset+position] = value
+	}
 }
 
 func (chip *Chip8) step() {
@@ -97,11 +110,23 @@ func (chip *Chip8) updateTimers() {
 	}
 }
 
-func (chip *Chip8) PrintMemory(from int, to int, padding int) {
-	start := from - padding
-	end := from + to + padding
-
-	for position, value := range chip.memory[start:end] {
-		fmt.Printf("%#x = %#x\n", start+position, value)
+func (chip *Chip8) push(value uint16) {
+	if chip.stack+2 == stackEnd {
+		log.Fatal("Stack overflow")
+		return
 	}
+
+	chip.memory[stackStart+chip.stack] = byte(value >> 8)
+	chip.memory[stackStart+chip.stack+1] = byte(value & 0xFF)
+	chip.stack += 2
+}
+
+func (chip *Chip8) pop() uint16 {
+	if chip.stack == stackStart {
+		log.Fatal("Stack underflow")
+		return 0
+	}
+
+	chip.stack -= 2
+	return uint16(chip.memory[stackStart+chip.stack])<<8 | uint16(chip.memory[stackStart+chip.stack+1])
 }
