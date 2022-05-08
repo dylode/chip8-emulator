@@ -32,6 +32,10 @@ type Chip8 struct {
 	/* Timers */
 	delay uint8
 	sound uint8
+
+	/* Clocks */
+	cpuClock   *time.Ticker
+	timerClock *time.Ticker
 }
 
 func New(rom []byte, screen *graphics.Graphics) *Chip8 {
@@ -45,6 +49,9 @@ func New(rom []byte, screen *graphics.Graphics) *Chip8 {
 		},
 
 		variable: make([]byte, variableRegisters),
+
+		cpuClock:   time.NewTicker(time.Second / cpuSpeed),
+		timerClock: time.NewTicker(time.Second / timerSpeed),
 	}
 
 	chip.injectIntoMemory(programStart, rom)
@@ -60,22 +67,24 @@ func (chip *Chip8) injectIntoMemory(offset int, data []byte) {
 }
 
 func (chip *Chip8) Run() {
-	cpuClock := time.NewTicker(time.Second / cpuSpeed)
-	timerClock := time.NewTicker(time.Second / timerSpeed)
-
 	for {
 		select {
-		case <-cpuClock.C:
+		case <-chip.cpuClock.C:
 			chip.step()
-		case <-timerClock.C:
+		case <-chip.timerClock.C:
 			chip.updateTimers()
 		}
 	}
 }
 
+func (chip *Chip8) Close() {
+	chip.cpuClock.Stop()
+	chip.timerClock.Stop()
+}
+
 func (chip *Chip8) step() {
 	chip.Keyboard.update()
-	fmt.Println(chip.Keyboard.state)
+
 }
 
 func (chip *Chip8) updateTimers() {
