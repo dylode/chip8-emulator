@@ -47,12 +47,12 @@ func main() {
 
 	go emulator.Run()
 
-	//for i := 0; i <= 800*300; i++ {
-	//	screen.Buffer[i] = 0xFF000000
-	//}
-	//
-	//screen.Update()
-	//
+	for i := 0; i <= 32*16; i++ {
+		screen.Buffer[i] = 0xFF000000
+	}
+
+	screen.Update()
+
 	running := true
 	for running {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {

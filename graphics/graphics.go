@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	screenWidth  = 800
-	screenHeight = 600
+	screenWidth   = 64
+	screenHeight  = 32
+	scalingFactor = 10
 )
 
 type Graphics struct {
@@ -22,8 +23,9 @@ func New() *Graphics {
 		log.Fatal(err)
 	}
 
-	window, err := sdl.CreateWindow("Chip-8 Emulator", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		screenWidth, screenHeight, sdl.WINDOW_SHOWN)
+	window, err := sdl.CreateWindow("Chip-8 Emulator",
+		sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
+		screenWidth*scalingFactor, screenHeight*scalingFactor, sdl.WINDOW_SHOWN)
 	if err != nil {
 		log.Fatal(err)
 	}
