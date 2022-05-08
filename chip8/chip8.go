@@ -64,15 +64,14 @@ func New(rom []byte, screen *graphics.Graphics) *Chip8 {
 }
 
 func (chip *Chip8) Run() {
-	//for {
-	//	select {
-	//	case <-chip.cpuClock.C:
-	//		chip.step()
-	//	case <-chip.timerClock.C:
-	//		chip.updateTimers()
-	//	}
-	//}
-	chip.step()
+	for {
+		select {
+		case <-chip.cpuClock.C:
+			chip.step()
+		case <-chip.timerClock.C:
+			chip.updateTimers()
+		}
+	}
 }
 
 func (chip *Chip8) Close() {
